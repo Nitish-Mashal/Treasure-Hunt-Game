@@ -1,12 +1,17 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="container text-center">
-      <h2 class="text-2xl font-bold mb-10 pt-10">Seek Game</h2>
+  <div class="flex items-center justify-center min-h-screen bg-gray-100 relative">
+
+    <!-- Game Icon (fixed top-left) -->
+    <div class="absolute top-4 left-4">
+      <img src="/seek.png" alt="Game Icon" class="w-12 h-12">
+    </div>
+
+    <div class="container text-center pb-2">
 
       <!-- Grid -->
       <div class="grid grid-cols-5 gap-2 justify-center mx-auto" v-if="flatGrid.length">
         <button v-for="(cell, index) in flatGrid" :key="index" @click="openCell(index)" :class="[
-          'w-16 h-16 rounded shadow text-xs font-semibold flex items-center justify-center transition',
+          'w-16 h-16 rounded shadow text-xl font-semibold flex items-center justify-center transition',
           openedCells.includes(index)
             ? cell === null
               ? 'brick-bg text-white'
@@ -16,7 +21,7 @@
             : 'bg-gray-700 text-white',
           'hover:scale-105'
         ]">
-          {{ openedCells.includes(index) ? (cell === null ? '' : cell === 0 ? '🎉' : cell) : '' }}
+          {{ openedCells.includes(index) ? (cell === null ? '' : cell === 0 ? '💎' : cell) : '' }}
         </button>
       </div>
     </div>
@@ -52,7 +57,7 @@ export default {
     async fetchGameData() {
       try {
         const response = await axios.get(
-          "http://147.93.106.108:5100/gameplays/seek/get-game?seek=683c41fec2f91538618dcce8"
+          "https://aqada.online/gameplays/seek/get-game?seek=683c41fec2f91538618dcce8"
         );
         const data = response.data;
 
@@ -72,11 +77,13 @@ export default {
 
       if (cellValue === null) {
         this.showToast("No clue here");
-      } else if (cellValue === 0) {
-        this.showToast("🎉 Treasure Found!");
+      }
+      else if (cellValue === 0) {
+        this.showToast("💎 Treasure Found!");
         this.launchConfetti();
-      } else {
-        this.showToast("Clue unlocked");
+      }
+      else {
+        this.showToast(`${cellValue} cells away`);
       }
     },
     showToast(message) {
@@ -86,11 +93,20 @@ export default {
       }, 2000);
     },
     launchConfetti() {
-      confetti({
-        particleCount: 150,
-        spread: 100,
-        origin: { y: 0.6 },
-      });
+      const duration = 4000; // 4 seconds
+      const end = Date.now() + duration;
+
+      const interval = setInterval(() => {
+        confetti({
+          particleCount: 80,
+          spread: 100,
+          origin: { y: 0.6 }
+        });
+
+        if (Date.now() > end) {
+          clearInterval(interval);
+        }
+      }, 300);
     },
   },
   mounted() {
@@ -107,5 +123,15 @@ export default {
     linear-gradient(#a89c92 5%, transparent 5%);
   background-size: 20px 20px;
   background-position: 0 0;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.8);
+  }
+
+  100% {
+    transform: scale(1.1);
+  }
 }
 </style>
